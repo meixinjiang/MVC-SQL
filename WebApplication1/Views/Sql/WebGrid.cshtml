@@ -1,0 +1,93 @@
+﻿@model IEnumerable<WebApplication1.Controllers.MyModel>
+
+@{
+    ViewBag.Title = "WebGrid";
+    var grid = new WebGrid(null,
+        defaultSort: ViewBag.sortCol,
+        sortFieldName: "sortCol",
+        sortDirectionFieldName: "sortDir",
+        rowsPerPage: ViewBag.rowsPerPage
+        );
+    grid.Bind(Model, rowCount: ViewBag.count, autoSortAndPage: false);
+}
+
+@functions {
+    public static string sortArrow(string columnName, string columnHeader, string direction, string column)
+    {
+        string header = columnHeader;
+        if (column == columnName)
+        {
+            if (direction == " Ascending") header = header + " ▲";
+            else if (direction == " Descending") header = header + " ▼";
+        }
+
+        return header;
+    }
+
+    public static string currency(decimal freight)
+    {
+        return "$" + Math.Round(Convert.ToDouble(freight), 2).ToString("N2");
+    }
+}
+
+<STYLE type="text/css">
+    .OrderID {text-align: right;}
+    .OrderDate {text-align: right;}
+    .Freight {text-align: right;}
+    .table
+        {
+            border: 1px solid #D3D3D3;
+            border-collapse: collapse;
+        }
+    .table td, th
+    {
+        border: 1px solid #D3D3D3;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+</STYLE>
+
+<h2>WebGrid View</h2>
+
+<div>
+    @grid.GetHtml(
+        htmlAttributes: new { id = "grid" },
+        tableStyle: "table",
+        columns: grid.Columns(
+            grid.Column("OrderID", sortArrow("OrderID", "Order ID", ViewBag.direction, ViewBag.sortCol), style: "OrderID"),
+            grid.Column("OrderDate", sortArrow("OrderDate", "Order Date", ViewBag.direction, ViewBag.sortCol), style: "OrderDate"),
+            grid.Column("Freight", sortArrow("Freight", "Freight", ViewBag.direction, ViewBag.sortCol), style: "Freight"),
+            grid.Column("ShipCity", sortArrow("ShipCity", "Ship City", ViewBag.direction, ViewBag.sortCol)),
+            grid.Column("ShipCountry", sortArrow("ShipCountry", "Ship Country", ViewBag.direction, ViewBag.sortCol)),
+            grid.Column("CompanyName", sortArrow("CompanyName", "Company Name", ViewBag.direction, ViewBag.sortCol)),
+            grid.Column("ContactName", sortArrow("ContactName", "Contact Name", ViewBag.direction, ViewBag.sortCol)),
+            grid.Column("EmpFirstName", sortArrow("EmpFirstName", "Emp First Name", ViewBag.direction, ViewBag.sortCol)),
+            grid.Column("EmpLastName", sortArrow("EmpLastName", "Emp Last Name", ViewBag.direction, ViewBag.sortCol))
+        ),
+        mode: WebGridPagerModes.All,
+        numericLinksCount: 10
+    )
+
+    <div>
+        <h3>Ordering by:</h3>
+        <b>@ViewBag.sortCol</b>@ViewBag.direction
+    </div>
+</div>
+
+<hr />
+
+<div style="max-width: 100%;">
+    <h4>Request SQL:</h4>
+    <textarea id="styled" rows="16" cols="100" style="max-width: 100%;">
+        @ViewBag.sql
+    </textarea>
+</div>
+
+<script type="text/javascript">
+    var freight = document.getElementsByClassName("Freight");
+    for (var i = 0; i < freight.length; i++) {
+        var item = freight[i].innerHTML;
+        var currency = "$" + parseFloat(item).toFixed(2).toString();
+        freight[i].innerHTML = currency;
+    }
+</script>
